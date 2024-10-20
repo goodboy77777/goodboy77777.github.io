@@ -1,4 +1,95 @@
+<html>
+	<head>
+		<title>SupaChat!</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	</head>
+<body>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-<h1>Hello World</h1>
-<p>Welcome!</p>
+const SUPABASE_URL = 'https://fxxhuaqchybifkwskqvk.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4eGh1YXFjaHliaWZrd3NrcXZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkyNzM0NDUsImV4cCI6MjA0NDg0OTQ0NX0.6jNj-QC62XQe1u8yyihFL8rcFLthEsA0eFI5zNnJexg'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+
+console.log("Connected to Supabase!")
+
+// Join a room/topic. Can be anything except for 'realtime'.
+const myChannel = supabase.channel('room', {
+  config: {
+    broadcast: { self: true },
+  },
+})
+
+var messages = []
+
+myChannel.on(
+  'broadcast',
+  { event: 'test-my-messages' },
+  (payload) => console.log(payload)
+)
+
+function render() {
+  let main = document.getElementById("main")
+  main.innerHTML = messages.map( m => `<div>${m.name}: ${m.message}</div>`).join('') 
+}
+
+
+myChannel.on(
+  'broadcast',
+  { event: 'message' },
+  (payload) => { 
+  let m = payload.payload
+  console.log(`name: ${m.name} message: ${m.message}`) 
+  messages.push(m) 
+  render() 
+  }
+  )
+
+function send() {
+  let input = document.getElementById("message")
+  let name = document.getElementById("name").value
+  let value = input.value
+  console.log(`value: ${value}`)
+  myChannel.send({
+    type: 'broadcast',
+    event: 'message',
+    payload: { 
+      name: name,
+      message: value 
+      }
+  })
+  input.value = ''
+}
+
+window.send = send
+
+myChannel.subscribe((status) => {
+  console.log("subscribed perhaps...")
+  console.log(status)
+  if (status !== 'SUBSCRIBED') { return }
+  myChannel.send({
+    type: 'broadcast',
+    event: 'test-my-messages',
+    payload: { message: 'talking to myself' },
+  })
+})
+
+</script>
+
+<div id="top">
+	name:<input id="name" type="text" value="noname"></input>
+</div>
+<div id="main">
+	<p>Hello</p>
+	<p>World</p>
+</div>
+<div id="bottom">
+	<input id="message" type="text"></input><button onclick="send()">send</button>
+</div>
+
+	</body>
+</html>
 
