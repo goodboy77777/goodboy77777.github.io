@@ -31,9 +31,13 @@ myChannel.on(
   (payload) => console.log(payload)
 )
 
+
+var audio = new Audio("chatsound.wav")
+
 function render() {
   let main = document.getElementById("main")
   main.innerHTML = messages.map( m => `<div>${m.name}: ${m.message}</div>`).join('') 
+  audio.play()
 }
 
 
