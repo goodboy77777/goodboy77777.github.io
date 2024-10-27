@@ -87,7 +87,7 @@ myChannel.subscribe((status) => {
 	<p>World</p>
 </div>
 <div id="bottom">
-	<input id="message" type="text"></input><button onclick="send()">send</button>
+	<input id="message" type="text" onkeydown = "if (event.keyCode == 13) send()"></input><button onclick="send()">send</button>
 </div>
 
 	</body>
